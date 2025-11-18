@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Section from "../components/Section";
 
 const BACKEND = import.meta.env.VITE_BACKEND_URL || "";
@@ -6,6 +6,13 @@ const BACKEND = import.meta.env.VITE_BACKEND_URL || "";
 export default function Join() {
   const [status, setStatus] = useState(null);
   const [form, setForm] = useState({ name: "", email: "", phone: "", program_slug: "", intention: "" });
+
+  // Prefill program from query string
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const program = params.get("program") || "";
+    if (program) setForm((f) => ({ ...f, program_slug: program }));
+  }, []);
 
   const endpoint = useMemo(() => `${BACKEND}/api/register`, []);
 
@@ -35,6 +42,9 @@ export default function Join() {
       </Section>
 
       <Section tone="light">
+        {!BACKEND && (
+          <div className="mb-4 text-sm text-[#B33A2F]">A beküldéshez be kell állítani a szerver címét (VITE_BACKEND_URL).</div>
+        )}
         <form onSubmit={submit} className="grid md:grid-cols-2 gap-6 max-w-3xl">
           <div>
             <label className="block text-sm font-medium">Név</label>
@@ -64,7 +74,7 @@ export default function Join() {
             <p className="mt-2 text-xs text-[#7A7F85]">Az adataid velünk maradnak. Nem adjuk tovább.</p>
           </div>
           <div>
-            <button className="inline-flex items-center rounded-md bg-[#173F2A] text-[#ECE7E1] px-5 py-2 text-sm font-semibold hover:bg-[#145233] transition-colors">Küldés</button>
+            <button disabled={!BACKEND} className="inline-flex items-center rounded-md bg-[#173F2A] text-[#ECE7E1] px-5 py-2 text-sm font-semibold hover:bg-[#145233] transition-colors disabled:opacity-60 disabled:cursor-not-allowed">Küldés</button>
           </div>
           {status && <div className="text-sm text-[#111315]/80">{status}</div>}
         </form>
